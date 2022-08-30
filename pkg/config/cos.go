@@ -444,7 +444,7 @@ func updateBridge(stage *yipSchema.Stage, name string, mgmtNetwork *Network) err
 
 	// setup pre up script
 	stage.Directories = append(stage.Directories, yipSchema.Directory{
-		Path:        "/etc/wicked/script",
+		Path:        "/etc/wicked/scripts",
 		Permissions: 0644,
 		Owner:       0,
 		Group:       0,
@@ -456,7 +456,7 @@ func updateBridge(stage *yipSchema.Stage, name string, mgmtNetwork *Network) err
 		return err
 	}
 	stage.Files = append(stage.Files, yipSchema.File{
-		Path:        "/etc/wicked/script/setup_bridge.sh",
+		Path:        "/etc/wicked/scripts/setup_bridge.sh",
 		Content:     preUpScript,
 		Permissions: 0755,
 		Owner:       0,
