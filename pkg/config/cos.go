@@ -100,7 +100,7 @@ func ConvertToCOS(config *HarvesterConfig) (*yipSchema.YipConfig, error) {
 
 	initramfs.Environment = cfg.OS.Environment
 
-	mgmtName, err := UpdateManagementInterfaceConfig(&initramfs, cfg.ManagementInterface, false)
+	_, err = UpdateManagementInterfaceConfig(&initramfs, cfg.ManagementInterface, false)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func ConvertToCOS(config *HarvesterConfig) (*yipSchema.YipConfig, error) {
 			Group:       0,
 		})
 
-		canalHelmChartConfig, err := render(canalConfig, mgmtName)
+		canalHelmChartConfig, err := render(canalConfig, nil)
 		if err != nil {
 			return nil, err
 		}
