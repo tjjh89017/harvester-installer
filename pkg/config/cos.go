@@ -99,7 +99,11 @@ func ConvertToCOS(config *HarvesterConfig) (*yipSchema.YipConfig, error) {
 
 	initramfs.Environment = cfg.OS.Environment
 
-	_, err = UpdateManagementInterfaceConfig(&initramfs, cfg.ManagementInterface, false)
+	if _, ok := cfg.Networks[LegacyMgmtInterfaceName]; !ok {
+		return nil, fmt.Errorf("%s not found in netwokrs", LegacyMgmtInterfaceName)
+	}
+
+	_, err = UpdateManagementInterfaceConfig(&initramfs, cfg.Networks[LegacyMgmtInterfaceName], false)
 	if err != nil {
 		return nil, err
 	}

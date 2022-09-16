@@ -927,7 +927,9 @@ func addNetworkPanel(c *Console) error {
 		}
 		logrus.Infof("Network configuration is applied: %s", output)
 
-		c.config.ManagementInterface = mgmtNetwork
+		c.config.Networks = map[string]config.Network{
+			config.LegacyMgmtInterfaceName: mgmtNetwork,
+		}
 
 		if mgmtNetwork.Method == config.NetworkMethodDHCP {
 			if addr, err := getIPThroughDHCP(config.MgmtInterfaceName); err != nil {
@@ -1554,11 +1556,17 @@ func addInstallPanel(c *Console) error {
 
 				if needToGetVIPFromDHCP(c.config.VipMode, c.config.Vip, c.config.VipHwAddr) {
 					printToPanel(c.Gui, "Configuring network...", installPanel)
-					if _, err := applyNetworks(c.config.ManagementInterface, c.config.Hostname); err != nil {
+
+					if _, ok := c.config.Networks[config.LegacyMgmtInterfaceName]; !ok {
+						printToPanel(c.Gui, fmt.Sprintf("%s not found in networks", config.LegacyMgmtInterfaceName), installPanel)
+						return
+					}
+
+					if _, err := applyNetworks(c.config.Networks[config.LegacyMgmtInterfaceName], c.config.Hostname); err != nil {
 						printToPanel(c.Gui, fmt.Sprintf("can't apply networks: %s", err), installPanel)
 						return
 					}
-					mgmtName := getManagementInterfaceName(c.config.ManagementInterface)
+					mgmtName := getManagementInterfaceName(c.config.Networks[config.LegacyMgmtInterfaceName])
 					vip, err := getVipThroughDHCP(mgmtName)
 					if err != nil {
 						printToPanel(c.Gui, fmt.Sprintf("fail to get vip: %s", err), installPanel)
@@ -1579,8 +1587,14 @@ func addInstallPanel(c *Console) error {
 
 			// lookup MAC Address to populate device names where needed
 			// lookup device name to populate MAC Address
+
+			if _, ok := c.config.Networks[config.LegacyMgmtInterfaceName]; !ok {
+				printToPanel(c.Gui, fmt.Sprintf("%s not found in networks", config.LegacyMgmtInterfaceName), installPanel)
+			}
+
 			tmpInterfaces := []config.NetworkInterface{}
-			for _, iface := range c.config.ManagementInterface.Interfaces {
+			network := c.config.Networks[config.LegacyMgmtInterfaceName]
+			for _, iface := range network.Interfaces {
 				if err := iface.FindNetworkInterfaceNameAndHwAddr(); err != nil {
 					logrus.Error(err)
 					printToPanel(c.Gui, err.Error(), installPanel)
@@ -1588,7 +1602,8 @@ func addInstallPanel(c *Console) error {
 				}
 				tmpInterfaces = append(tmpInterfaces, iface)
 			}
-			c.config.ManagementInterface.Interfaces = tmpInterfaces
+			network.Interfaces = tmpInterfaces
+			c.config.Networks[config.LegacyMgmtInterfaceName] = network
 
 			// We need ForceGPT because cOS only supports ForceGPT (--force-gpt) flag, not ForceMBR!
 			c.config.ForceGPT = !c.config.ForceMBR
@@ -1599,7 +1614,8 @@ func addInstallPanel(c *Console) error {
 			}
 
 			// case insensitive for network method and vip mode
-			c.config.ManagementInterface.Method = strings.ToLower(c.config.ManagementInterface.Method)
+			network.Method = strings.ToLower(network.Method)
+			c.config.Networks[config.LegacyMgmtInterfaceName] = network
 
 			if err := validateConfig(ConfigValidator{}, c.config); err != nil {
 				printToPanel(c.Gui, err.Error(), installPanel)
@@ -1685,7 +1701,7 @@ func addVIPPanel(c *Console) error {
 			spinner := NewSpinner(c.Gui, vipTextPanel, "Requesting IP through DHCP...")
 			spinner.Start()
 			go func(g *gocui.Gui) {
-				mgmtName := getManagementInterfaceName(c.config.ManagementInterface)
+				mgmtName := getManagementInterfaceName(c.config.Networks[config.LegacyMgmtInterfaceName])
 				vip, err := getVipThroughDHCP(mgmtName)
 				if err != nil {
 					spinner.Stop(true, err.Error())

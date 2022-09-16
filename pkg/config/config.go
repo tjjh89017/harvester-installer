@@ -10,8 +10,7 @@ import (
 )
 
 const (
-	SchemeVersion = 1
-	SanitizeMask  = "***"
+	SanitizeMask = "***"
 )
 
 type NetworkInterface struct {
@@ -95,9 +94,9 @@ type Webhook struct {
 }
 
 type Install struct {
-	Automatic           bool    `json:"automatic,omitempty"`
-	Mode                string  `json:"mode,omitempty"`
-	ManagementInterface Network `json:"managementInterface,omitempty"`
+	Automatic bool               `json:"automatic,omitempty"`
+	Mode      string             `json:"mode,omitempty"`
+	Networks  map[string]Network `json:"networks,omitempty"`
 
 	Vip       string `json:"vip,omitempty"`
 	VipHwAddr string `json:"vipHwAddr,omitempty"`
@@ -157,9 +156,8 @@ type ClusterNetwork struct {
 }
 
 type HarvesterConfig struct {
-	SchemeVersion uint32 `json:"schemeVersion,omitempty"`
-	ServerURL     string `json:"serverUrl,omitempty"`
-	Token         string `json:"token,omitempty"`
+	ServerURL string `json:"serverUrl,omitempty"`
+	Token     string `json:"token,omitempty"`
 
 	OS                     `json:"os,omitempty"`
 	Install                `json:"install,omitempty"`

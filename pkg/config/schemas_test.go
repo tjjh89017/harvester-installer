@@ -59,9 +59,11 @@ func TestToHarvesterConfig(t *testing.T) {
 				},
 				Install: Install{
 					Mode: "create",
-					ManagementInterface: Network{
-						Interfaces: []NetworkInterface{{Name: "ens0"}, {Name: "ens3"}},
-						Method:     "dhcp",
+					Networks: map[string]Network{
+						LegacyMgmtInterfaceName: {
+							Interfaces: []NetworkInterface{{Name: "ens0"}, {Name: "ens3"}},
+							Method:     "dhcp",
+						},
 					},
 					ForceEFI: true,
 					Device:   "/dev/vda",

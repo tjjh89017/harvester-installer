@@ -165,7 +165,13 @@ func checkIPList(ipList []string) error {
 	return nil
 }
 
-func checkNetworks(network config.Network, dnsServers []string) error {
+func checkNetworks(networks map[string]config.Network, dnsServers []string) error {
+	if _, ok := networks[config.LegacyMgmtInterfaceName]; !ok {
+		return errors.New(ErrMsgMgmtInterfaceNotSpecified)
+	}
+
+	network := networks[config.LegacyMgmtInterfaceName]
+
 	if len(network.Interfaces) == 0 {
 		return errors.New(ErrMsgInterfaceNotSpecifiedForMgmt)
 	}
@@ -309,7 +315,7 @@ func (v ConfigValidator) Validate(cfg *config.HarvesterConfig) error {
 		}
 	}
 
-	if err := checkNetworks(cfg.Install.ManagementInterface, cfg.OS.DNSNameservers); err != nil {
+	if err := checkNetworks(cfg.Install.Networks, cfg.OS.DNSNameservers); err != nil {
 		return err
 	}
 
