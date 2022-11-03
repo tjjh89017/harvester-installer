@@ -1,4 +1,5 @@
 iso:
+  firmware: efi
   uefi:
     - live/grub2-efi-image
   image:
