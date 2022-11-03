@@ -1,0 +1,13 @@
+iso:
+  uefi:
+    - live/grub2-efi-image
+  image:
+    - live/grub2
+    - live/grub2-efi-image
+  label: "COS_LIVE"
+#image_prefix: "distro"
+date: true
+repo:
+  - name: cOS
+    uri: quay.io/costoolkit/releases-green
+    type: docker

@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 TOP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." &> /dev/null && pwd )"
 ARTIFACTS_DIR="${TOP_DIR}/dist/artifacts"
@@ -17,7 +17,7 @@ source ${SCRIPTS_DIR}/version-harvester ${TOP_DIR}/../harvester
 source ${SCRIPTS_DIR}/version-monitoring
 source ${SCRIPTS_DIR}/version-logging
 
-BASE_OS_IMAGE="rancher/harvester-os:20221025"
+BASE_OS_IMAGE="rancher/harvester-os:20221103-a6def95"
 HARVESTER_OS_IMAGE=rancher/harvester-os:$VERSION
 
 cd ${PACKAGE_HARVESTER_OS_DIR}
@@ -39,7 +39,7 @@ EOF
 # Collect dependencies' versions
 ${SCRIPTS_DIR}/collect-deps.sh harvester-release.yaml
 
-docker build --pull \
+docker build \
 	--build-arg BASE_OS_IMAGE="${BASE_OS_IMAGE}" \
 	--build-arg HARVESTER_PRETTY_NAME="${PRETTY_NAME}" \
 	-t ${HARVESTER_OS_IMAGE} .
@@ -67,9 +67,8 @@ find $BUNDLE_DIR -type f -exec chmod +r {} +
 # build ISO
 ISO_PREFIX="${PROJECT_PREFIX}-${ARCH}"
 cp harvester-release.yaml iso
-yq e ".overlay.isoimage = \"$(pwd)/iso\"" iso.yaml -i
 echo "set harvester_version=${VERSION}" > iso/boot/grub2/harvester.cfg
-luet-makeiso iso.yaml --image "${HARVESTER_OS_IMAGE}" --output ${ARTIFACTS_DIR}/${ISO_PREFIX}
+elemental build-iso "${HARVESTER_OS_IMAGE}" --config-dir "$(pwd)" --local --overlay-iso "$(pwd)/iso" --output ${ARTIFACTS_DIR} --name ${ISO_PREFIX}
 rm ${ARTIFACTS_DIR}/${ISO_PREFIX}.iso.sha256
 
 # Extract the squashfs image for PXE boot
