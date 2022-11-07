@@ -1,7 +1,7 @@
 iso:
   firmware: efi
-  uefi:
-    - live/grub2-efi-image
+    #  uefi:
+    #- live/grub2-efi-image
   image:
     - live/grub2
     - live/grub2-efi-image
