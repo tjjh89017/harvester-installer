@@ -1,14 +1,13 @@
 iso:
-  firmware: efi
-    #  uefi:
-    #- live/grub2-efi-image
+  uefi:
+    - channel:live/grub2-efi-image
   image:
-    - live/grub2
-    - live/grub2-efi-image
+    - channel:live/grub2
+    - channel:live/grub2-efi-image
   label: "COS_LIVE"
 #image_prefix: "distro"
 date: true
-repo:
-  - name: cOS
-    uri: quay.io/costoolkit/releases-green
-    type: docker
+repositories:
+  - uri: quay.io/costoolkit/releases-green
+    arch: "x86_64"
+    name: cOS
